@@ -17,6 +17,20 @@ const modalImageAdd = document.querySelector('.modal__image-add');
 const textFileBtn = modalFileBtn.textContent;
 const srcModalImage = modalImageAdd.src;
 
+// модалка карточки товара
+const modalImageItem = document.querySelector('.modal__image-item');
+const modalHeaderItem = document.querySelector('.modal__header-item');
+const modalStatusItem = document.querySelector('.modal__status-item');
+const modalDescriptionItem = document.querySelector('.modal__description-item');
+const modalCostItem = document.querySelector('.modal__cost-item');
+const buyBtn = document.querySelector('.buy-btn');
+
+// поиск
+const searchInput = document.querySelector('.search__input');
+
+// категории
+const menuContainer = document.querySelector('.menu__container');
+
 const elementsModalSubmit = [...modalSubmit.elements].filter(elem => elem.tagName !== 'BUTTON' && elem.type !== 'submit');
 
 // записываем даные из формы
@@ -39,21 +53,18 @@ const closeModal = function(event) {
         document.removeEventListener('keydown', closeModal);
         modalSubmit.reset();
         checkForm();
-
-        if (this === modalAdd) {
-            modalSubmit.reset();
-            modalImageAdd.src = srcModalImage;
-            modalFileBtn.textContent = textFileBtn;
-        }
+        modalSubmit.reset();
+        modalImageAdd.src = srcModalImage;
+        modalFileBtn.textContent = textFileBtn;
     }
 };
 
-const renderCard = () => {
+const renderCard = (DB = dataBase) => {
     catalog.textContent = '';
 
-    dataBase.forEach((item, i) => {
+    DB.forEach((item) => {
         catalog.insertAdjacentHTML('beforeend', `
-            <li class="card" data-id="${i}">
+            <li class="card" data-id="${item.id}">
                 <img class="card__image" src="data: image/jpeg;base64, ${item.image}" alt="test">
                 <div class="card__description">
                     <h3 class="card__header">${item.nameItem}</h3>
@@ -63,6 +74,18 @@ const renderCard = () => {
         `);
     });
 };
+
+// поиск
+searchInput.addEventListener('input', () => {
+    const valueSearch = searchInput.value.trim().toLowerCase();
+
+    if (valueSearch.length > 2) {
+        const result = dataBase.filter(item => item.nameItem.toLowerCase().includes(valueSearch) || item.descriptionItem.toLowerCase().includes(valueSearch));
+        renderCard(result);
+    } else if (valueSearch.length == 0) {
+        renderCard();
+    }
+});
 
 // добавление картинок
 const infoPhoto = {};
@@ -89,20 +112,22 @@ modalFileInput.addEventListener('change', event => {
         }
         
     });
-    console.log(infoPhoto);
 });
 
 modalSubmit.addEventListener('input', checkForm);
 
 // собираем данне из формы
+let counter = dataBase.length;
+
 modalSubmit.addEventListener('submit', event => {
     event.preventDefault();
     const itemObj = {};
 
     for (const elem of elementsModalSubmit) {
-        itemObj[elem.name] = elem.value;        
+        itemObj[elem.name] = elem.value;
     }
 
+    itemObj.id = counter++; 
     itemObj.image = infoPhoto.base64;
     dataBase.push(itemObj);
     closeModal({target: modalAdd});
@@ -120,9 +145,28 @@ addAd.addEventListener('click', () => {
 // карточка товара
 catalog.addEventListener('click', event => {
     const target = event.target;
-    if (target.closest('.card')) {
+    const card = target.closest('.card');
+
+    if (card) {
+        const item = dataBase.find(item => item.id === +card.dataset.id);
+        modalImageItem.src = `data: image/jpeg;base64, ${item.image}`;
+        modalHeaderItem.textContent = item.nameItem;
+        modalStatusItem.textContent = item.status === 'new' ? 'Новый' : 'Б/У';
+        modalDescriptionItem.textContent = item.descriptionItem;
+        modalCostItem.textContent = item.costItem;
+        buyBtn
         modalItem.classList.remove('hide');
         document.addEventListener('keydown', closeModal);
+    }
+});
+
+menuContainer.addEventListener('click', event => {
+    const target = event.target;
+    
+    if (target.tagName === 'A') {
+        const result = dataBase.filter(item => item.category === target.dataset.category);
+
+        renderCard(result);
     }
 });
 

@@ -1,7 +1,7 @@
 'use strict';
 
 const dataBase = JSON.parse(localStorage.getItem('awito')) || [];
-//console.log(dataBase);
+
 const modalAdd = document.querySelector('.modal__add');
 const addAd = document.querySelector('.add__ad');
 const modalBtnSubmit = document.querySelector('.modal__btn-submit');
@@ -33,7 +33,7 @@ const menuContainer = document.querySelector('.menu__container');
 
 const elementsModalSubmit = [...modalSubmit.elements].filter(elem => elem.tagName !== 'BUTTON' && elem.type !== 'submit');
 
-// записываем даные из формы
+// записываем данные из формы
 const saveDB = () => localStorage.setItem('awito', JSON.stringify(dataBase));
 
 // если заполнены все поля формы, удаляем надпись и активируем кнопку
@@ -116,7 +116,7 @@ modalFileInput.addEventListener('change', event => {
 
 modalSubmit.addEventListener('input', checkForm);
 
-// собираем данне из формы
+// собираем данные из формы
 let counter = dataBase.length;
 
 modalSubmit.addEventListener('submit', event => {
@@ -160,9 +160,10 @@ catalog.addEventListener('click', event => {
     }
 });
 
+// категории
 menuContainer.addEventListener('click', event => {
     const target = event.target;
-    
+
     if (target.tagName === 'A') {
         const result = dataBase.filter(item => item.category === target.dataset.category);
 
